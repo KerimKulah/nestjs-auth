@@ -8,6 +8,7 @@ import { UseGuards } from '@nestjs/common';
 import { JwtGuard } from 'src/common/guards/JwtGuard';
 import { RolesGuard } from 'src/common/guards/RolesGuard';
 import { ApiBearerAuth } from '@nestjs/swagger';
+import { UpdateUserRoleDto } from './dto/update-user-role.dto';
 
 @Controller('users')
 @UseGuards(JwtGuard, RolesGuard)
@@ -70,5 +71,12 @@ export class UserController {
   @HttpCode(200)
   async updateUser(@Param('id', ParseIntPipe) id: number, @Body() updateUserDto: UpdateUserDto): Promise<{ message: string }> {
     return this.userService.updateUser(id, updateUserDto);
+  }
+
+  //UPDATE USER ROLE
+  @Put(':id/role')
+  @HttpCode(200)
+  async changeUserRole(@Param('id', ParseIntPipe) id: number, @Body() updateUserRoleDto: UpdateUserRoleDto): Promise<{ message: string }> {
+    return this.userService.updateUserRole(id, updateUserRoleDto);
   }
 }

@@ -2,11 +2,12 @@ import { Injectable, BadRequestException, NotFoundException, ConflictException, 
 import { CreateUserDto } from './dto/create-user.dto';
 import { InjectRepository } from '@nestjs/typeorm';
 import { User } from './entities/user.entity';
-import { Repository } from 'typeorm';
+import { In, Repository } from 'typeorm';
 import { Role } from 'src/role/entities/role.entity';
 import * as bcrypt from 'bcrypt';
 import { UpdateUserDto } from './dto/update-user.dto';
 import { Transactional } from 'typeorm-transactional';
+import { UpdateUserRoleDto } from './dto/update-user-role.dto';
 
 @Injectable()
 export class UserService {
@@ -285,6 +286,30 @@ export class UserService {
         throw error;
       }
       throw error instanceof HttpException ? error : new InternalServerErrorException('Failed to update user');
+    }
+  }
+
+  // UPDATE USER ROLE
+  @Transactional()
+  async updateUserRole(id: number, updateUserRoleDto: UpdateUserRoleDto): Promise<{ message: string }> {
+    try {
+      const user = await this.userRepository.findOne({ where: { id } });
+
+      if (!user) {
+        this.logger.debug(`Update failed - User not found with ID: ${id}`);
+        throw new NotFoundException('User not found');
+      }
+
+      const roles = await this.roleRepository.findBy({ name: In(updateUserRoleDto.roles) });
+      user.roles = roles;
+      await this.userRepository.save(user);
+
+      this.logger.log(`User role updated with ID: ${id}`);
+      return { message: 'User role updated successfully' };
+
+    } catch (error) {
+      this.logger.error(`Error updating user role for user ID ${id}: ${error.message}`, error.stack);
+      throw error instanceof HttpException ? error : new InternalServerErrorException('Failed to update user role');
     }
   }
 
