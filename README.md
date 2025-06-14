@@ -39,9 +39,6 @@ NestJS ile geliştirilen bu Authentication Microservice, JWT tabanlı kimlik do�
 | **cookie-parser** | Cookie yönetimi                      |
 | **helmet**        | Güvenlik için HTTP başlıkları        |
 | **compression**   | Performans için sıkıştırma           |
-| **Jest**          | Test altyapısı                       |
-| **dotenv**        | Ortam değişkenleri yönetimi          |
-
 
 ## 🔒 Güvenlik Mimarisine Genel Bakış
 
