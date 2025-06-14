@@ -71,7 +71,7 @@ export class AuthController {
     // Yeni Refresh token cookie olarak kaydet
     res.cookie('refreshToken', newRefreshToken.hash, {
       httpOnly: true,
-      secure: false, //TODO: true
+      secure: process.env.NODE_ENV === 'production',
       sameSite: 'strict',
       path: '/',
       maxAge: newRefreshToken.expiresAt.getTime() - Date.now(),
@@ -93,7 +93,7 @@ export class AuthController {
 
     res.clearCookie('refreshToken', {
       httpOnly: true,
-      secure: false, // TRUE
+      secure: process.env.NODE_ENV === 'production',
       sameSite: 'strict',
       path: '/',
     });
@@ -110,7 +110,7 @@ export class AuthController {
 
     res.clearCookie('refreshToken', {
       httpOnly: true,
-      secure: false, // TRUE
+      secure: process.env.NODE_ENV === 'production',
       sameSite: 'strict',
       path: '/'
     });
@@ -120,7 +120,7 @@ export class AuthController {
 
   //Force Logout 
   @Post('force-logout/:userId')
-  @UseGuards(JwtGuard)
+  @UseGuards(JwtGuard, RolesGuard)
   @Roles('admin')
   async forceLogout(@Param('userId', ParseIntPipe) userId: number): Promise<{ message: string }> {
     return this.authService.forceLogout(userId);

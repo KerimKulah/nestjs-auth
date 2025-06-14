@@ -7,10 +7,12 @@ import { Roles } from 'src/common/decorators/roles.decorator';
 import { UseGuards } from '@nestjs/common';
 import { JwtGuard } from 'src/common/guards/JwtGuard';
 import { RolesGuard } from 'src/common/guards/RolesGuard';
+import { ApiBearerAuth } from '@nestjs/swagger';
 
 @Controller('users')
 @UseGuards(JwtGuard, RolesGuard)
 @Roles('admin')
+@ApiBearerAuth() // SWAGGER İÇİN
 export class UserController {
   constructor(private readonly userService: UserService) { }
 
