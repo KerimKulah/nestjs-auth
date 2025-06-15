@@ -9,6 +9,7 @@ import { JwtGuard } from 'src/common/guards/JwtGuard';
 import { RolesGuard } from 'src/common/guards/RolesGuard';
 import { ApiBearerAuth } from '@nestjs/swagger';
 import { UpdateUserRoleDto } from './dto/update-user-role.dto';
+import { UserDto } from './dto/user.dto';
 
 @Controller('users')
 @UseGuards(JwtGuard, RolesGuard)
@@ -31,10 +32,10 @@ export class UserController {
     return this.userService.delete(id);
   }
 
-  // GET ALL USER
+  // GET ALL USER DTO
   @Get()
   @HttpCode(200)
-  async findAll(): Promise<User[]> {
+  async findAll(): Promise<UserDto[]> {
     return this.userService.findAll();
   }
 
