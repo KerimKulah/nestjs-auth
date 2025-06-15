@@ -16,11 +16,12 @@ import { UnauthorizedException } from '@nestjs/common';
 import { Roles } from 'src/common/decorators/roles.decorator';
 import { ApiBearerAuth } from '@nestjs/swagger';
 import { RolesGuard } from 'src/common/guards/RolesGuard';
+import { UserService } from 'src/user/user.service';
 
 @Controller('auth')
-@ApiBearerAuth('jwt') 
+@ApiBearerAuth('jwt')
 export class AuthController {
-  constructor(private readonly authService: AuthService) { }
+  constructor(private readonly authService: AuthService, private readonly userService: UserService) { }
 
   @Post('login')
   async login(@Req() req: Request, @Res({ passthrough: true }) res: Response, @Body() loginDto: LoginDto): Promise<LoginResponseDto> {
@@ -43,17 +44,19 @@ export class AuthController {
     return loginServiceResponse.loginResponseDto;
   }
 
-  
+
   @Post('register')
   @HttpCode(201)
-   async register(@Body() registerDto: RegisterDto): Promise<{ message: string }> {
-     return this.authService.register(registerDto);
-   }
+  async register(@Body() registerDto: RegisterDto): Promise<{ message: string }> {
+    return this.authService.register(registerDto);
+  }
 
-   @Get('current-user')
-   async getCurrentUser(@CurrentUser() user: User): Promise<User> {
-     return user;
-   }
+  @UseGuards(JwtGuard)
+  @Get('current-user')
+   async getCurrentUser(@CurrentUser() userPayload): Promise<User> {
+   const user = await this.userService.findOne(userPayload.id);
+   return user;
+  }
 
   //RefreshAccess
   @Post('refresh-access')
@@ -84,10 +87,12 @@ export class AuthController {
   //Logout Current Device
   @Post('logout')
   @UseGuards(JwtGuard)
-  async logout(@CurrentUser() user: User, @Req() req: Request, @Res({ passthrough: true }) res: Response): Promise<{ message: string }> {
+  async logout(@CurrentUser() userPayload, @Req() req: Request, @Res({ passthrough: true }) res: Response): Promise<{ message: string }> {
     const forwarded = req.headers['x-forwarded-for'];
     const ip = typeof forwarded === 'string' ? forwarded.split(',')[0].trim() : req.ip || 'unknown';
     const device = req.get('user-agent') || 'unknown';
+
+    const user = await this.userService.findOne(userPayload.id);
 
     const response = await this.authService.logoutCurrentDevice(user, device, ip);
 
@@ -104,7 +109,9 @@ export class AuthController {
   //Logout All Devices
   @Post('logout-all')
   @UseGuards(JwtGuard)
-  async logoutAllDevices(@CurrentUser() user: User, @Res({ passthrough: true }) res: Response): Promise<{ message: string }> {
+  async logoutAllDevices(@CurrentUser() userPayload, @Res({ passthrough: true }) res: Response): Promise<{ message: string }> {
+
+    const user = await this.userService.findOne(userPayload.id);
 
     const response = await this.authService.logoutAllDevices(user);
 
@@ -129,14 +136,16 @@ export class AuthController {
   //ChangePassword
   @Put('change-password')
   @UseGuards(JwtGuard)
-  async changePassword(@CurrentUser() user: User, @Body() changePasswordDto: ChangePasswordDto): Promise<{ message: string }> {
+  async changePassword(@CurrentUser() userPayload, @Body() changePasswordDto: ChangePasswordDto): Promise<{ message: string }> {
+    const user = await this.userService.findOne(userPayload.id);
     return this.authService.changePassword(user, changePasswordDto);
   }
 
   //ChangeEmail
   @Put('change-email')
   @UseGuards(JwtGuard)
-  async changeEmail(@CurrentUser() user: User, @Body() changeEmailDto: ChangeEmailDto): Promise<{ message: string }> {
+  async changeEmail(@CurrentUser() userPayload, @Body() changeEmailDto: ChangeEmailDto): Promise<{ message: string }> {
+    const user = await this.userService.findOne(userPayload.id);
     return this.authService.changeEmail(user, changeEmailDto);
   }
 
