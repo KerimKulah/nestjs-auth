@@ -1,4 +1,4 @@
-import { Module } from '@nestjs/common';
+import { forwardRef, Module } from '@nestjs/common';
 import { JwtModule } from '@nestjs/jwt';
 import { PassportModule } from '@nestjs/passport';
 import { AuthService } from './auth.service';
@@ -11,12 +11,14 @@ import { Role } from '../role/entities/role.entity';
 import { RefreshToken } from './entities/refresh-token.entity';
 import { ConfigModule, ConfigService } from '@nestjs/config';
 import { UserModule } from '../user/user.module';
+import { JwtGuard } from 'src/common/guards/JwtGuard';
+import { RolesGuard } from 'src/common/guards/RolesGuard';
 
 @Module({
   imports: [
     PassportModule,
     JwtModule.registerAsync({
-      imports: [ConfigModule],
+      imports: [ConfigModule],  
       inject: [ConfigService],
       useFactory: (configService: ConfigService) => ({
         secret: configService.get<string>('JWT_SECRET'),
@@ -25,12 +27,26 @@ import { UserModule } from '../user/user.module';
         },
       }),
     }),
+
     TypeOrmModule.forFeature([User, Role, RefreshToken]),
-    UserModule,
+    forwardRef(() => UserModule)
   ],
   controllers: [AuthController],
-  providers: [AuthService, JwtStrategy, RefreshTokenService],
-  exports: [AuthService, RefreshTokenService],
+  providers: [
+    AuthService,
+    JwtStrategy, 
+    JwtGuard,
+    RolesGuard,
+    RefreshTokenService
+  ],
+  exports: [
+    JwtGuard,
+    RolesGuard,
+    AuthService, 
+    JwtModule,
+    JwtStrategy,
+    RefreshTokenService
+  ],
 })
 
-export class AuthModule { }
+export class AuthModule {}

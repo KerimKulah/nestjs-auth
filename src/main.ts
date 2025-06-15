@@ -2,7 +2,6 @@
 import { NestFactory } from '@nestjs/core';
 import { AppModule } from './app.module';
 import { ValidationPipe } from '@nestjs/common';
-import { SwaggerModule, DocumentBuilder } from '@nestjs/swagger';
 import helmet from 'helmet';
 import * as compression from 'compression';
 import * as cookieParser from 'cookie-parser';
@@ -12,17 +11,18 @@ import { SeedService } from './seed/seed.service';
 async function bootstrap() {
   const app = await NestFactory.create(AppModule);
 
+  // Global prefix
   app.setGlobalPrefix('api');
 
+  // Middlewares
   app.use(cookieParser());
-
   app.use(helmet());
-
   app.use(compression());
 
   // Swagger config
   SwaggerConfig(app);
 
+  // Validation pipe
   app.useGlobalPipes(
     new ValidationPipe({
       whitelist: true,
@@ -34,6 +34,7 @@ async function bootstrap() {
     }),
   );
 
+  // CORS
   app.enableCors({
     origin: ['http://localhost:3000', 'http://localhost:' + (process.env.PORT || '3000')],
     methods: 'GET,HEAD,PUT,PATCH,POST,DELETE,OPTIONS',
@@ -41,7 +42,7 @@ async function bootstrap() {
     credentials: true,
   });
 
-  // Seed işlemini uygulama başlatıldıktan sonra çağır
+  // Seed 
   try {
     const seedService = app.get(SeedService);
     await seedService.seedAll();

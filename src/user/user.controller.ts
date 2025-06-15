@@ -14,7 +14,7 @@ import { UserDto } from './dto/user.dto';
 @Controller('users')
 @UseGuards(JwtGuard, RolesGuard)
 @Roles('admin')
-@ApiBearerAuth() // SWAGGER İÇİN
+@ApiBearerAuth('jwt')
 export class UserController {
   constructor(private readonly userService: UserService) { }
 

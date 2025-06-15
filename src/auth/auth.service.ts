@@ -11,7 +11,6 @@ import { RefreshAccessDto } from './dto/refresh-access.dto';
 import { LoginDto } from './dto/login-dto';
 import { RegisterDto } from './dto/register-dto';
 import { Role } from 'src/role/entities/role.entity';
-import { CurrentUser } from 'src/common/decorators/currentuser.decorator';
 import { ChangePasswordDto } from './dto/change-password.dto';
 import { ChangeEmailDto } from './dto/change-email.dto';
 import { RefreshToken } from './entities/refresh-token.entity';

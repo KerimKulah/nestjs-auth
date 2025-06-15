@@ -7,7 +7,6 @@ import { v4 as uuidv4 } from 'uuid';
 import { UnauthorizedException } from "@nestjs/common";
 import { Cron } from "@nestjs/schedule";
 import { Transactional } from "typeorm-transactional";
-import { CurrentUser } from "src/common/decorators/currentuser.decorator";
 import { Logger } from "@nestjs/common";
 
 @Injectable()

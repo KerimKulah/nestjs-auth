@@ -11,10 +11,17 @@ import { DataSource } from 'typeorm';
 
 @Module({
   imports: [
+    
+    // Modules
     AuthModule,
     UserModule,
     RoleModule,
+
+    // Configs etc.
     ConfigModule.forRoot({ isGlobal: true }),
+    ScheduleModule.forRoot(),
+
+    // TypeORM
     TypeOrmModule.forRoot({
       type: 'postgres',
       host: process.env.DB_HOST,
@@ -26,13 +33,9 @@ import { DataSource } from 'typeorm';
       synchronize: true,
       logging: true,
     }),
-    TypeOrmModule.forFeature([
-      require('./role/entities/role.entity').Role,
-      require('./user/entities/user.entity').User
-    ]),
-    ScheduleModule.forRoot()],
-  providers: [
-    SeedService],
+
+  ],
+  providers: [SeedService],
 })
 
 export class AppModule {
