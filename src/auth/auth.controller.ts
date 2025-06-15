@@ -17,6 +17,7 @@ import { Roles } from 'src/common/decorators/roles.decorator';
 import { ApiBearerAuth } from '@nestjs/swagger';
 import { RolesGuard } from 'src/common/guards/RolesGuard';
 import { UserService } from 'src/user/user.service';
+import { UserDto } from 'src/user/dto/user.dto';
 
 @Controller('auth')
 @ApiBearerAuth('jwt')
@@ -53,9 +54,9 @@ export class AuthController {
 
   @UseGuards(JwtGuard)
   @Get('current-user')
-   async getCurrentUser(@CurrentUser() userPayload): Promise<User> {
-   const user = await this.userService.findOne(userPayload.id);
-   return user;
+   async getCurrentUser(@CurrentUser() userPayload): Promise<UserDto> {
+   const userDto = await this.userService.getUserDto(userPayload.id);
+   return userDto;
   }
 
   //RefreshAccess

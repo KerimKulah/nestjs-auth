@@ -8,6 +8,7 @@ import * as bcrypt from 'bcrypt';
 import { UpdateUserDto } from './dto/update-user.dto';
 import { Transactional } from 'typeorm-transactional';
 import { UpdateUserRoleDto } from './dto/update-user-role.dto';
+import { UserDto } from './dto/user.dto';
 
 @Injectable()
 export class UserService {
@@ -75,12 +76,40 @@ export class UserService {
   }
 
   // GET ALL USERS - Loglama kaldırıldı (yüksek frekanslı işlem)
-  async findAll(): Promise<User[]> {
+  async findAll(): Promise<UserDto[]> {
     try {
-      return await this.userRepository.find({ relations: ['roles'] });
+      return await this.userRepository.find({ relations: ['roles'] })
+        .then(users => users.map(user => {
+          const { password, ...userDto } = user;
+          return userDto;
+        }));
     } catch (error) {
       this.logger.error(`Failed to retrieve users: ${error.message}`, error.stack);
       throw new InternalServerErrorException('Failed to retrieve users');
+    }
+  }
+
+  // GET ONE USER - Sadece hata durumunda log
+  async getUserDto(id: number): Promise<UserDto> {
+    try {
+      const user = await this.userRepository.findOne({
+        where: { id },
+        relations: ['roles'],
+      });
+
+      if (!user) {
+        this.logger.debug(`User not found with ID: ${id}`);
+        throw new NotFoundException('User not found');
+      }
+
+      const { password, ...userDto } = user;
+      return userDto;
+    } catch (error) {
+      if (error instanceof NotFoundException) {
+        throw error;
+      }
+      this.logger.error(`Error fetching user with ID ${id}: ${error.message}`, error.stack);
+      throw new InternalServerErrorException('Failed to fetch user');
     }
   }
 
